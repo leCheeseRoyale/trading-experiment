@@ -1,0 +1,9 @@
+mcp>=1.0.0
+backtesting>=0.3.3
+pandas>=2.1
+pandas-ta>=0.3.14b0
+numpy>=1.26
+sqlmodel>=0.0.18
+yfinance>=0.2
+ccxt>=4.3
+loguru>=0.7
