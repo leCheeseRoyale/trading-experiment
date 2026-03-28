@@ -3,6 +3,6 @@
   "version": "0.1.0",
   "description": "Autonomous crypto strategy research via backtesting. Claude designs experiments, writes strategy code, runs backtests via MCP tools, analyzes results, and iterates until a target threshold is met.",
   "author": {
-    "name": "Maxwell"
+    "name": "Showerhead"
   }
 }
