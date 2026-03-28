@@ -1,22 +1,25 @@
 # Trading Experiment
 
-A Claude Code plugin that turns Claude into an autonomous trading strategy researcher. Describe a trading idea in plain English, and Claude will design experiments, write strategy code, run backtests, analyze results, and iterate — all without manual intervention — until it finds a strategy that meets your performance targets on out-of-sample data.
+A Claude Code plugin that turns Claude into an autonomous algorithmic trading strategy factory. Give it a market and a direction, and it will continuously generate, mutate, and evolve trading strategies — writing new `backtesting.py` Strategy classes, running them against real market data, and spawning variations of whatever works. It doesn't stop at one good idea. It keeps creating.
 
 ## What It Does
 
-You say something like:
+You point it at a market:
 
-> "4h timeframe, BTC perp on binance, last 6 months. Try mean reversion after volume spikes with ATR-based stops."
+> "4h timeframe, BTC perp on binance, last 6 months. Start with mean reversion after volume spikes."
 
-Claude then:
+Claude then enters an autonomous creation loop:
 
-1. Fetches market data and checks trading constraints (fees, contract type, leverage)
-2. Designs a falsifiable hypothesis and writes a `backtesting.py` Strategy class
-3. Runs the backtest with automatic 70/30 in-sample / out-of-sample validation
-4. Analyzes results, detects overfitting, and decides what to try next
-5. Repeats — refining, mutating, or pivoting — until targets are met or iterations run out
+1. **Generates** a new algorithmic trading strategy as a `backtesting.py` Strategy class — complete with entry logic, exit logic, and risk management
+2. **Backtests** it with automatic 70/30 in-sample / out-of-sample validation
+3. **Evaluates** the results — Sharpe ratio, drawdown, overfitting detection, trade count
+4. **Mutates** winning strategies by rewriting their core logic — replacing the entry mechanism entirely, adding a different market regime filter, switching from momentum to mean-reversion, combining ideas from multiple past strategies. This is not parameter tuning. Each mutation produces a fundamentally new strategy with different trading logic.
+5. **Pivots** when an approach is exhausted — abandoning the entire thesis and generating a completely new strategy from a different market idea
+6. **Repeats** — constantly writing new strategy code, building on what the market data says works, discarding what doesn't
 
-The entire loop runs autonomously. You can set Sharpe ratio targets, max drawdown thresholds, and iteration limits. Results are saved to a local SQLite database so nothing is lost.
+Each iteration produces a distinct, executable trading strategy with its own logic. Not the same strategy with different numbers — a genuinely different algorithm. The database fills up with a diverse population of strategies, each one a different bet on how the market behaves.
+
+Think of it as a strategy factory that writes new trading algorithms until it hits your performance targets or exhausts its iteration budget.
 
 ## Installation
 
@@ -51,11 +54,11 @@ Run an experiment with the slash command:
 /experiment
 ```
 
-Claude will ask what you want to trade and how. Just describe it naturally — no flags or structured arguments required. Examples:
+Claude will ask what market to target and any preferences you have. Just describe it naturally. Examples:
 
-- "BTC mean reversion using volume-price divergence, 4h candles, last year"
-- "Find me something that works on ETH daily, I don't care what"
-- "Limit orders at support/resistance levels on SOL/USDT with tight risk management"
+- "Generate BTC strategies on 4h candles, last year of data. Start with momentum."
+- "Create strategies for ETH daily. I don't care what approach — just find something profitable."
+- "Build limit-order strategies around support/resistance on SOL/USDT with tight stops"
 
 ### What you can configure
 
@@ -90,11 +93,11 @@ A Python backtesting engine exposed as MCP tools:
 
 ### Skill (`/experiment`)
 
-Research methodology prompt that guides Claude through understanding your intent, confirming parameters, and dispatching the autonomous agent.
+Parses your intent, confirms the target market and parameters, then launches the autonomous strategy generation loop.
 
 ### Agent (`experiment-runner`)
 
-Autonomous subagent that runs the full experiment loop in the background — plan, code, backtest, analyze, repeat.
+Autonomous subagent that continuously creates, backtests, and evolves trading strategies in the background — generating new code each iteration.
 
 ## Architecture
 
