@@ -8,11 +8,11 @@ from sqlmodel import SQLModel, Field
 
 
 class StrategyStatus(str, enum.Enum):
-    PENDING = "PENDING"
-    RUNNING = "RUNNING"
-    DONE = "DONE"
-    ERROR = "ERROR"
-    SKIPPED = "SKIPPED"
+    PENDING = "pending"
+    RUNNING = "running"
+    DONE = "done"
+    ERROR = "error"
+    SKIPPED = "skipped"
 
 
 class Strategy(SQLModel, table=True):
@@ -54,12 +54,6 @@ class BacktestResult(SQLModel, table=True):
     total_trades: int = 0
     avg_trade_duration_hours: float = 0.0
 
-    # Serialized data
-    equity_curve: list = Field(default_factory=list, sa_column=Column(JSON))
-    drawdown_series: list = Field(default_factory=list, sa_column=Column(JSON))
-    trades: list = Field(default_factory=list, sa_column=Column(JSON))
-    raw_stats: dict = Field(default_factory=dict, sa_column=Column(JSON))
-
     # Out-of-sample metrics
     oos_total_return_pct: float = 0.0
     oos_sharpe_ratio: float = 0.0
@@ -69,5 +63,12 @@ class BacktestResult(SQLModel, table=True):
     oos_verdict: str = ""
     train_period: str = ""
     test_period: str = ""
+
+    # Serialized data
+    equity_curve: list = Field(default_factory=list, sa_column=Column(JSON))
+    drawdown_series: list = Field(default_factory=list, sa_column=Column(JSON))
+    trades: list = Field(default_factory=list, sa_column=Column(JSON))
+    raw_stats: dict = Field(default_factory=dict, sa_column=Column(JSON))
+    trade_summary: dict = Field(default_factory=dict, sa_column=Column(JSON))
 
     error_log: Optional[str] = None

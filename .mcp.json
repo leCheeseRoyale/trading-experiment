@@ -1,9 +1,8 @@
 {
   "mcpServers": {
     "trading-lab": {
-      "command": "python",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/server/main.py"],
-      "env": {}
+      "command": "${CLAUDE_PLUGIN_ROOT}/server/.venv/Scripts/python",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server/main.py"]
     }
   }
 }
