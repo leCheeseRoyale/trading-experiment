@@ -89,12 +89,33 @@ def _build_trade_summary(stats) -> dict:
     }
 
 
-def _get_equity_and_drawdown(stats) -> tuple[list, list]:
-    equity = stats["_equity_curve"]["Equity"].tolist()
+def _get_equity_summary(stats, cash: float) -> dict:
+    """Compute summary figures from the equity curve instead of returning raw arrays."""
     eq_series = stats["_equity_curve"]["Equity"]
     running_max = eq_series.cummax()
-    dd = ((eq_series - running_max) / running_max * 100).tolist()
-    return equity, dd
+    dd_series = (eq_series - running_max) / running_max * 100
+
+    peak_equity = float(running_max.max())
+    final_equity = float(eq_series.iloc[-1])
+    peak_to_trough_max = float(dd_series.min())
+
+    # Time spent in drawdown (% of bars where equity < peak)
+    in_drawdown = (eq_series < running_max).sum()
+    total_bars = len(eq_series)
+    time_in_drawdown_pct = (in_drawdown / total_bars * 100) if total_bars > 0 else 0.0
+
+    # Recovery factor: total return / max drawdown
+    total_return = final_equity - cash
+    recovery_factor = abs(total_return / (peak_equity * peak_to_trough_max / 100)) if peak_to_trough_max < 0 else 0.0
+
+    return {
+        "starting_equity": cash,
+        "peak_equity": round(peak_equity, 2),
+        "final_equity": round(final_equity, 2),
+        "max_drawdown_pct": round(peak_to_trough_max, 2),
+        "time_in_drawdown_pct": round(time_in_drawdown_pct, 1),
+        "recovery_factor": round(recovery_factor, 2),
+    }
 
 
 def validate_strategy_code(code: str) -> dict:
@@ -291,7 +312,7 @@ def run_backtest(
             full_stats, _, _ = _run_single(
                 strategy_cls, ohlcv_df, params, cash, effective_commission, trade_on_close
             )
-            equity_curve, drawdown_series = _get_equity_and_drawdown(full_stats)
+            equity_summary = _get_equity_summary(full_stats, cash)
 
             degradation = _oos_verdict(is_metrics["sharpe_ratio"], oos_metrics["sharpe_ratio"])
             is_ret = is_metrics["total_return_pct"]
@@ -309,8 +330,7 @@ def run_backtest(
                 "oos_degradation": degradation,
                 "trade_summary": is_trade_summary,
                 "oos_trade_summary": oos_trade_summary,
-                "equity_curve": equity_curve,
-                "drawdown_series": drawdown_series,
+                "equity_summary": equity_summary,
                 "train_period": train_period,
                 "test_period": test_period,
             }
@@ -318,7 +338,7 @@ def run_backtest(
             stats, metrics, trade_summary = _run_single(
                 strategy_cls, ohlcv_df, params, cash, effective_commission, trade_on_close
             )
-            equity_curve, drawdown_series = _get_equity_and_drawdown(stats)
+            equity_summary = _get_equity_summary(stats, cash)
             metrics["period"] = {
                 "from": ohlcv_df.index[0].strftime("%Y-%m-%d"),
                 "to": ohlcv_df.index[-1].strftime("%Y-%m-%d"),
@@ -331,8 +351,7 @@ def run_backtest(
                 "out_of_sample": None,
                 "oos_degradation": None,
                 "trade_summary": trade_summary,
-                "equity_curve": equity_curve,
-                "drawdown_series": drawdown_series,
+                "equity_summary": equity_summary,
             }
 
     except Exception as e:
@@ -344,6 +363,5 @@ def run_backtest(
             "out_of_sample": None,
             "oos_degradation": None,
             "trade_summary": None,
-            "equity_curve": [],
-            "drawdown_series": [],
+            "equity_summary": None,
         }

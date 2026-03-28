@@ -146,10 +146,6 @@ def run_backtest(
     if validation["warnings"]:
         result["validation_warnings"] = validation["warnings"]
 
-    # Equity curves are too large for LLM context
-    result.pop("equity_curve", None)
-    result.pop("drawdown_series", None)
-
     return json.dumps(result, indent=2, default=str)
 
 
